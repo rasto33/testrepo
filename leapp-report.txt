@@ -1,0 +1,282 @@
+Risk Factor: high 
+Title: Packages available in excluded repositories will not be installed
+Summary: 4 packages will be skipped because they are available only in target system repositories that are intentionally excluded from the list of repositories used during the upgrade. See the report message titled "Excluded target system repositories" for details.
+The list of these packages:
+- libnsl2-devel (repoid: codeready-builder-for-rhel-8-x86_64-rpms)
+- python3-pyxattr (repoid: codeready-builder-for-rhel-8-x86_64-rpms)
+- rpcgen (repoid: codeready-builder-for-rhel-8-x86_64-rpms)
+- rpcsvc-proto-devel (repoid: codeready-builder-for-rhel-8-x86_64-rpms)
+Key: 2437e204808f987477c0e9be8e4c95b3a87a9f3e
+----------------------------------------
+Risk Factor: high 
+Title: Detected custom leapp actors or files.
+Summary: We have detected installed custom actors or files on the system. These can be provided e.g. by third party vendors, Red Hat consultants, or can be created by users to customize the upgrade (e.g. to migrate custom applications). This is allowed and appreciated. However Red Hat is not responsible for any issues caused by these custom leapp actors. Note that upgrade tooling is under agile development which could require more frequent update of custom actors.
+The list of custom leapp actors and files:
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/amazon-id.py
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/cdn.redhat.com-chain.crt
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/content-rhel8.crt
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/content-rhel8.key
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/leapp-aws.repo
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/rhui-client-config-server-8.crt
+    - /usr/share/leapp-repository/repositories/system_upgrade/common/files/rhui/aws/rhui-client-config-server-8.key
+Related links:
+    - Customizing your Red Hat Enterprise Linux in-place upgrade: https://red.ht/customize-rhel-upgrade
+Remediation: [hint] In case of any issues connected to custom or third party actors, contact vendor of such actors. Also we suggest to ensure the installed custom leapp actors are up to date, compatible with the installed packages.
+Key: 2064870018370ce2bde3f977cf753ed8c59848d0
+----------------------------------------
+Risk Factor: high 
+Title: GRUB2 core will be automatically updated during the upgrade
+Summary: On legacy (BIOS) systems, GRUB2 core (located in the gap between the MBR and the first partition) cannot be updated during the rpm transaction and Leapp has to initiate the update running "grub2-install" after the transaction. No action is needed before the upgrade. After the upgrade, it is recommended to check the GRUB configuration.
+Key: ac7030e05d2ee248d34f08a9fa040b352bc410a3
+----------------------------------------
+Risk Factor: high 
+Title: Difference in Python versions and support in RHEL 8
+Summary: In RHEL 8, there is no 'python' command. Python 3 (backward incompatible) is the primary Python version and Python 2 is available with limited support and limited set of packages. If you no longer require Python 2 packages following the upgrade, please remove them. Read more here: https://red.ht/rhel-8-python
+Related links:
+    - Difference in Python versions and support in RHEL 8: https://red.ht/rhel-8-python
+Remediation: [hint] Please run "alternatives --set python /usr/bin/python3" after upgrade
+Key: 0c98585b1d8d252eb540bf61560094f3495351f5
+----------------------------------------
+Risk Factor: high 
+Title: Packages not signed by Red Hat found on the system
+Summary: The following packages have not been signed by Red Hat and may be removed during the upgrade process in case Red Hat-signed packages to be removed during the upgrade depend on them:
+- managesoft
+- mdatp
+- mde-netfilter
+- td-agent
+- tos-client
+- tos-collector
+Key: 13f0791ae5f19f50e7d0d606fb6501f91b1efb2c
+----------------------------------------
+Risk Factor: medium 
+Title: Module pam_pkcs11 will be removed from PAM configuration
+Summary: Module pam_pkcs11 was surpassed by SSSD and therefore it was removed from RHEL-8. Keeping it in PAM configuration may lock out the system thus it will be automatically removed from PAM configuration before upgrading to RHEL-8. Please switch to SSSD to recover the functionality of pam_pkcs11.
+Remediation: [hint] Configure SSSD to replace pam_pkcs11
+Key: bf47e7305d6805e8bbeaa7593cf01e38030c23f3
+----------------------------------------
+Risk Factor: low 
+Title: SElinux will be set to permissive mode
+Summary: SElinux will be set to permissive mode. Current mode: enforcing. This action is required by the upgrade process to make sure the upgraded system can boot without beinig blocked by SElinux rules.
+Remediation: [hint] Make sure there are no SElinux related warnings after the upgrade and enable SElinux manually afterwards. Notice: You can ignore the "/root/tmp_leapp_py3" SElinux warnings.
+Key: 39d7183dafba798aa4bbb1e70b0ef2bbe5b1772f
+----------------------------------------
+Risk Factor: low 
+Title: Postfix has incompatible changes in the next major version
+Summary: Postfix 3.x has so called "compatibility safety net" that runs Postfix programs with backwards-compatible default settings. It will log a warning whenever backwards-compatible default setting may be required for continuity of service. Based on this logging the system administrator can decide if any backwards-compatible settings need to be made permanent in main.cf or master.cf, before turning off the backwards-compatibility safety net.
+The backward compatibility safety net is by default turned off in Red Hat Enterprise Linux 8.
+It can be turned on by running:  "postconf -e compatibility_level=0
+It can be turned off by running: "postconf -e compatibility_level=2
+
+In the Postfix MySQL database client, the default "option_group" value has changed to "client", i.e. it now reads options from the [client] group from the MySQL configuration file. To disable it, set "option_group" to the empty string.
+
+The postqueue command no longer forces all message arrival times to be reported in UTC. To get the old behavior, set TZ=UTC in main.cf:import_environment.
+
+Postfix 3.2 enables elliptic curve negotiation. This changes the default smtpd_tls_eecdh_grade setting to "auto", and introduces a new parameter "tls_eecdh_auto_curves" with the names of curves that may be negotiated.
+
+The "master.cf" chroot default value has changed from "y" (yes) to "n" (no). This applies to master.cf services where chroot field is not explicitly specified.
+
+The "append_dot_mydomain" default value has changed from "yes" to "no". You may need changing it to "yes" if senders cannot use complete domain names in e-mail addresses.
+
+The "relay_domains" default value has changed from "$mydestination" to the empty value. This could result in unexpected "Relay access denied" errors or ETRN errors, because now will postfix by default relay only for the localhost.
+
+The "mynetworks_style" default value has changed from "subnet" to "host". This parameter is used to implement the "permit_mynetworks" feature. The change could result in unexpected "access denied" errors, because postfix will now by default trust only the local machine, not the remote SMTP clients on the same IP subnetwork.
+
+Postfix now supports dynamically loaded database plugins. Plugins are shipped in individual RPM sub-packages. Correct database plugins have to be installed, otherwise the specific database client will not work. For example for PostgreSQL map to work, the postfix-pgsql RPM package has to be installed.
+
+Key: 5721e0a07a67d82cf7e5ea6f17662cd4f82e0a33
+----------------------------------------
+Risk Factor: low 
+Title: Grep has incompatible changes in the next major version
+Summary: If a file contains data improperly encoded for the current locale, and this is discovered before any of the file's contents are output, grep now treats the file as binary.
+The 'grep -P' no longer reports an error and exits when given invalid UTF-8 data. Instead, it considers the data to be non-matching.
+In locales with multibyte character encodings other than UTF-8, grep -P now reports an error and exits instead of misbehaving.
+When searching binary data, grep now may treat non-text bytes as line terminators. This can boost performance significantly.
+The 'grep -z' no longer automatically treats the byte '\200' as binary data.
+Context no longer excludes selected lines omitted because of -m. For example, 'grep "^" -m1 -A1' now outputs the first two input lines, not just the first line.
+
+Remediation: [hint] Please update your scripts to be compatible with the changes.
+Key: 94665a499e2eeee35eca3e7093a7abe183384b16
+----------------------------------------
+Risk Factor: low 
+Title: chrony using non-default configuration
+Summary: chrony behavior will not change in RHEL8
+Key: 9acbfcce3d310a70b602c7ab0a9c2cb94eb6b63f
+----------------------------------------
+Risk Factor: low 
+Title: Some enabled RPM repositories are unknown to Leapp
+Summary: The following repositories with Red Hat-signed packages are unknown to Leapp:
+- rhel-7-server-rhui-rpms
+And the following packages installed from those repositories may not be upgraded:
+- nss-pem
+- nss-tools
+- telnet
+- less
+- perl-libs
+- openssh-clients
+- perl-parent
+- libtirpc
+- perl-Params-Check
+- perl-Time-HiRes
+- pyparsing
+- geoipupdate
+- perl-Pod-Perldoc
+- openssl-libs
+- perl-macros
+- subscription-manager-rhsm-certificates
+- libnetfilter_queue
+- redhat-release-server
+- python
+- python2-pyasn1
+- perl-Socket
+- perl-threads
+- perl-Time-Local
+- perl-File-Temp
+- gdbm-devel
+- dhclient
+- perl-Text-ParseWords
+- redhat-support-tool
+- nspr
+- device-mapper-persistent-data
+- expat-devel
+- libaio-devel
+- perl-Scalar-List-Utils
+- perl-HTTP-Tiny
+- insights-client
+- redhat-support-lib-python
+- perl-IPC-Cmd
+- nss-sysinit
+- perl-threads-shared
+- libaio
+- perl-Encode
+- glibc
+- python2-cryptography
+- automake
+- lvm2-libs
+- perl-Carp
+- perl-Data-Dumper
+- perl-Module-CoreList
+- GeoIP
+- perl-Exporter
+- libssh2
+- perl-constant
+- perl-ExtUtils-Manifest
+- wget
+- python-cffi
+- glibc-common
+- openssh
+- openssl
+- dhcp-common
+- libarchive
+- perl-Module-Load
+- perl-File-Path
+- subscription-manager
+- nss-softokn
+- systemtap-sdt-devel
+- lvm2
+- subscription-manager-rhsm
+- perl-Module-Metadata
+- python-libs
+- perl-Module-Load-Conditional
+- nss
+- perl-Test-Harness
+- python-syspurpose
+- perl
+- m4
+- python-ply
+- perl-Storable
+- libmpc
+- openssh-server
+- perl-Getopt-Long
+- perl-version
+- libdb-devel
+- dhcp-libs
+- perl-Locale-Maketext-Simple
+- perl-PathTools
+- perl-ExtUtils-Install
+- zlib
+- device-mapper-event-libs
+- nss-util
+- device-mapper-event
+- autoconf
+- cronie-anacron
+- sudo
+- perl-Pod-Simple
+- sysstat
+- curl
+- glibc-devel
+- bzip2
+- cmake
+- perl-Thread-Queue
+- libcurl
+- python-pycparser
+- nss-softokn-freebl
+- python-enum34
+- perl-devel
+- perl-podlators
+- perl-ExtUtils-MakeMaker
+- perl-ExtUtils-ParseXS
+- perl-Pod-Escapes
+- libtool
+- lm_sensors-libs
+- libtool-ltdl
+- perl-Filter
+- rhc
+- glibc-headers
+- cronie
+- perl-Pod-Usage
+- python-jwcrypto
+- diffutils
+- perl-Locale-Maketext
+- mpfr
+Remediation: [hint] You can file a request to add this repository to the scope of in-place upgrades by filing a support ticket
+Key: 8e89e20c645cea600b240156071d81c64daab7ad
+----------------------------------------
+Risk Factor: low 
+Title: The subscription-manager release is going to be set after the upgrade
+Summary: After the upgrade has completed the release of the subscription-manager will be set to 8.8. This will ensure that you will receive and keep the version you choose to upgrade to.
+Remediation: [hint] If you wish to receive updates for the latest released version of the target system, run `subscription-manager release --unset` after the upgrade.
+Key: 747a4ca25303eda17d1891bb85eeb226be14f252
+----------------------------------------
+Risk Factor: info 
+Title: Upgrade initiated with RHSM on public cloud with RHUI infrastructure
+Summary: Leapp detected this system is on public cloud with RHUI infrastructure but the process was initiated without "--no-rhsm" command line option which implies RHSM usage (valid subscription is needed).
+Key: 7ab885a3872057a0035591afcf174f65e6f34933
+----------------------------------------
+Risk Factor: info 
+Title: Excluded target system repositories
+Summary: The following repositories are not supported by Red Hat and are excluded from the list of repositories used during the upgrade.
+- codeready-builder-beta-for-rhel-8-s390x-rpms
+- codeready-builder-beta-for-rhel-8-ppc64le-rpms
+- rhui-codeready-builder-for-rhel-8-x86_64-rhui-rpms
+- codeready-builder-for-rhel-8-aarch64-eus-rpms
+- codeready-builder-for-rhel-8-ppc64le-eus-rpms
+- codeready-builder-beta-for-rhel-8-x86_64-rpms
+- codeready-builder-for-rhel-8-aarch64-rpms
+- codeready-builder-for-rhel-8-s390x-rpms
+- codeready-builder-for-rhel-8-s390x-eus-rpms
+- codeready-builder-for-rhel-8-x86_64-eus-rpms
+- rhui-codeready-builder-for-rhel-8-aarch64-rhui-rpms
+- codeready-builder-beta-for-rhel-8-aarch64-rpms
+- codeready-builder-for-rhel-8-rhui-rpms
+- codeready-builder-for-rhel-8-x86_64-rhui-rpms
+- codeready-builder-for-rhel-8-x86_64-rpms
+- codeready-builder-for-rhel-8-x86_64-eus-rhui-rpms
+- codeready-builder-for-rhel-8-ppc64le-rpms
+Remediation: [hint] If some of excluded repositories are still required to be used during the upgrade, execute leapp with the --enablerepo option with the repoid of the repository required to be enabled as an argument (the option can be used multiple times).
+Key: 1b9132cb2362ae7830e48eee7811be9527747de8
+----------------------------------------
+Risk Factor: info 
+Title: SElinux relabeling will be scheduled
+Summary: SElinux relabeling will be scheduled as the status is permissive/enforcing.
+Key: 8fb81863f8413bd617c2a55b69b8e10ff03d7c72
+----------------------------------------
+Risk Factor: info 
+Title: Current PAM and nsswitch.conf configuration will be kept.
+Summary: There is a new tool called authselect in RHEL8 that replaced authconfig. The upgrade process was unable to find an authselect profile that would be equivalent to your current configuration. Therefore your configuration will be left intact.
+Key: 40c4ab1da4a30dc1ca40e543f6385e1336d8810c
+----------------------------------------
+Risk Factor: info 
+Title: Automatic registration into Red Hat Insights
+Summary: After the upgrade, this system will be automatically registered into Red Hat Insights. To skip the automatic registration, use the '--no-insights-register' command line option or set the LEAPP_NO_INSIGHTS_REGISTER environment variable.
+Key: 693963253195f418526f045b6d630a1f4c7a193d
+----------------------------------------
